@@ -8,6 +8,7 @@ import collections
 
 SET = 3
 
+
 # Greed is a dice game where you roll up to five dice to accumulate
 # points.  The following "score" function will be used calculate the
 # score of a single roll of the dice.
@@ -37,75 +38,20 @@ SET = 3
 #
 # Your goal is to write the score method.
 
-def score(dice_rolls):
-    if not dice_rolls:
-        return 0
-
-    rolls_to_counts = collections.Counter(dice_rolls)
-    rolls_to_scoring_counts = _get_rolls_to_scoring_counts(rolls_to_counts)
-
-    total_points = 0
-    total_points += _calc_set_points(rolls_to_scoring_counts)
-    total_points += _calc_nonset_points(rolls_to_scoring_counts)
-    return total_points
-
-def _get_rolls_to_scoring_counts(rolls_to_counts):
-    '''Return a dict of rolls to scoring counts.
-
-    ScoringCounts is a namedtuple: ScoringCounts(sets, nonsets)
-    containing the set count and nonset count as values for each roll key.
-
-    '''
-
-    rolls_to_scoring_counts = {}
-    ScoringCounts = collections.namedtuple('ScoringCounts', 'sets nonsets')
-
-    for roll in rolls_to_counts:
-        cur_roll_count = rolls_to_counts[roll]
-
-        if _roll_has_a_set(cur_roll_count):
-            set_count = math.floor(cur_roll_count / SET)
-            nonset_count = cur_roll_count % SET
+def score(dice):
+    s = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, }
+    for num in dice:
+        s[num] += 1
+    score = 0
+    for num, count in s.items():
+        ans, rem = divmod(count, 3) # count = ans//rem and 3 = ans%rem
+        if num == 1:
+            score += 1000 * ans + rem * 100
+        elif num == 5:
+            score += (num*100) * ans + rem * 50
         else:
-            set_count = 0
-            nonset_count = cur_roll_count
-
-        rolls_to_scoring_counts[roll] = ScoringCounts(set_count, nonset_count)
-    return rolls_to_scoring_counts
-
-
-def _roll_has_a_set(roll_count):
-    return roll_count >= SET
-
-
-def _calc_set_points(rolls_to_scoring_counts):
-    def _accumulate_set_points(accum, roll):
-        SET_ROLL_TO_POINTS = {
-            1: 1000,
-            2: 2 * 100,
-            3: 3 * 100,
-            4: 4 * 100,
-            5: 5 * 100,
-            6: 6 * 100
-        }
-        return accum + SET_ROLL_TO_POINTS[roll] * rolls_to_scoring_counts[roll].sets
-
-    return functools.reduce(_accumulate_set_points, rolls_to_scoring_counts, 0)
-
-
-def _calc_nonset_points(rolls_to_scoring_counts):
-    def _accumlate_nonset_points(accum, roll):
-        ROLL_TO_POINTS = {
-            1: 100,
-            2: 0,
-            3: 0,
-            4: 0,
-            5: 50,
-            6: 0
-        }
-        return accum + ROLL_TO_POINTS[roll] * rolls_to_scoring_counts[roll].nonsets
-
-    return functools.reduce(_accumlate_nonset_points, rolls_to_scoring_counts, 0)
+            score += (num*100) * ans
+    return score
 
 
 class AboutScoringProject(Koan):
@@ -119,26 +65,26 @@ class AboutScoringProject(Koan):
         self.assertEqual(100, score([1]))
 
     def test_score_of_multiple_1s_and_5s_is_the_sum_of_individual_scores(self):
-        self.assertEqual(300, score([1,5,5,1]))
+        self.assertEqual(300, score([1, 5, 5, 1]))
 
     def test_score_of_single_2s_3s_4s_and_6s_are_zero(self):
-        self.assertEqual(0, score([2,3,4,6]))
+        self.assertEqual(0, score([2, 3, 4, 6]))
 
     def test_score_of_a_triple_1_is_1000(self):
-        self.assertEqual(1000, score([1,1,1]))
+        self.assertEqual(1000, score([1, 1, 1]))
 
     def test_score_of_other_triples_is_100x(self):
-        self.assertEqual(200, score([2,2,2]))
-        self.assertEqual(300, score([3,3,3]))
-        self.assertEqual(400, score([4,4,4]))
-        self.assertEqual(500, score([5,5,5]))
-        self.assertEqual(600, score([6,6,6]))
+        self.assertEqual(200, score([2, 2, 2]))
+        self.assertEqual(300, score([3, 3, 3]))
+        self.assertEqual(400, score([4, 4, 4]))
+        self.assertEqual(500, score([5, 5, 5]))
+        self.assertEqual(600, score([6, 6, 6]))
 
     def test_score_of_mixed_is_sum(self):
-        self.assertEqual(250, score([2,5,2,2,3]))
-        self.assertEqual(550, score([5,5,5,5]))
-        self.assertEqual(1150, score([1,1,1,5,1]))
+        self.assertEqual(250, score([2, 5, 2, 2, 3]))
+        self.assertEqual(550, score([5, 5, 5, 5]))
+        self.assertEqual(1150, score([1, 1, 1, 5, 1]))
 
     def test_ones_not_left_out(self):
-        self.assertEqual(300, score([1,2,2,2]))
-        self.assertEqual(350, score([1,5,2,2,2]))
+        self.assertEqual(300, score([1, 2, 2, 2]))
+        self.assertEqual(350, score([1, 5, 2, 2, 2]))
