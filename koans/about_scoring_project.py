@@ -2,11 +2,6 @@
 # -*- coding: utf-8 -*-
 
 from runner.koan import *
-import math
-import functools
-import collections
-
-SET = 3
 
 
 # Greed is a dice game where you roll up to five dice to accumulate
